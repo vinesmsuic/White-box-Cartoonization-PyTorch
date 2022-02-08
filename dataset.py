@@ -28,7 +28,7 @@ class MyDataset(Dataset):
         A_img = np.array(Image.open(A_path).convert("RGB"))
         B_img = np.array(Image.open(B_path).convert("RGB"))
 
-        A_img = config.transform_train(image=A_img)
-        B_img = config.transform_train(image=B_img)
+        A_img = config.transform_train(image=A_img)["image"]
+        B_img = config.transform_train(image=B_img)["image"]
 
         return A_img, B_img

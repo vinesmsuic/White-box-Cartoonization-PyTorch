@@ -48,6 +48,8 @@ def initialization_phase(gen, loader, opt_gen, l1_loss, VGG, pretrain_epochs):
 
 def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss, mse,
              VGG, extract_structure, extract_texture, extract_surface, var_loss):
+
+    step = 0
     loop = tqdm(loader, leave=True)
 
     # Training
@@ -120,17 +122,21 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
         #===============================================================================
 
-        if idx % 200 == 0:
-            save_image(sample_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(idx) + "_photo.png"))
-            save_image(fake_cartoon*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(idx) + "_fakecartoon.png"))
+        
 
-        #loop.set_postfix(step=idx)
+        if step % 200 == 0:
+            save_image(sample_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo.png"))
+            save_image(fake_cartoon*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_fakecartoon.png"))
+
+        step += 1
+
+        loop.set_postfix(step=step)
 
 def main():
     print(config.DEVICE)
     disc_texture = Discriminator(in_channels=3).to(config.DEVICE)
     disc_surface = Discriminator(in_channels=3).to(config.DEVICE)
-    gen = Generator(in_channels=3).to(config.DEVICE)
+    gen = Generator(img_channels=3).to(config.DEVICE)
 
     opt_disc = optim.Adam(itertools.chain(disc_surface.parameters(),disc_texture.parameters()), lr=config.LEARNING_RATE, betas=(0.5, 0.999))
     opt_gen = optim.Adam(gen.parameters(), lr=config.LEARNING_RATE, betas=(0.5, 0.999))

@@ -15,7 +15,8 @@ VAL_PHOTO_DIR = os.path.join(VAL_DIR, "photo")
 RESULT_TRAIN_DIR = os.path.join("results", "train")
 RESULT_TEST_DIR = os.path.join("results", "test")
 
-BATCH_SIZE = 16
+#BATCH_SIZE = 16 # Paper used Batch size = 16
+BATCH_SIZE = 1
 LEARNING_RATE = 2e-4
 
 # LAMBDA values
@@ -43,13 +44,20 @@ VGG_WEIGHTS = "vgg19-dcbb9e9d.pth"
 LOAD_CHECKPOINT_DISC = "i_disc.pth.tar"
 LOAD_CHECKPOINT_GEN = "i_gen.pth.tar"
 
-
 transform_photo = A.Compose(
     [
         #A.RandomCrop(width=IMAGE_SIZE*1.2, height=IMAGE_SIZE*1.2),
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
         #A.HorizontalFlip(p=0.5),
         #A.RandomBrightnessContrast(p=0.2),
+        A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255.0,),
+        ToTensorV2(),
+    ]
+)
+
+transform_train = A.Compose(
+    [
+        A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
         A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255.0,),
         ToTensorV2(),
     ]
