@@ -47,7 +47,7 @@ def initialization_phase(gen, loader, opt_gen, l1_loss, VGG, pretrain_epochs):
     
 
 def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss, mse,
-             VGG, extract_structure, extract_texture, extract_surface):
+             VGG, extract_structure, extract_texture, extract_surface, var_loss):
     loop = tqdm(loader, leave=True)
 
     # Training
@@ -91,26 +91,26 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
         # Guided Filter
         blur_fake = extract_surface(output_photo, output_photo, r=5, eps=2e-1)
         D_blur_fake = disc_surface(blur_fake)
-        g_loss_surface = 1 * l1_loss(D_blur_fake, torch.zeros_like(D_blur_fake))
+        g_loss_surface = config.LAMBDA_SURFACE * l1_loss(D_blur_fake, torch.zeros_like(D_blur_fake))
 
         # Color Shift
         gray_fake, = extract_texture(output_photo)
         D_gray_fake = disc_texture(gray_fake)
-        g_loss_texture = 0.1 * l1_loss(D_gray_fake, torch.zeros_like(D_gray_fake))
+        g_loss_texture = config.LAMBDA_TEXTURE * l1_loss(D_gray_fake, torch.zeros_like(D_gray_fake))
 
         # SuperPixel
         input_superpixel = extract_structure(output_photo.detach())
         vgg_output = VGG(output_photo)
         _, c, h, w = vgg_output.shape
         vgg_superpixel = VGG(input_superpixel)
-        superpixel_loss = 200 * l1_loss(vgg_superpixel, vgg_output) / (c*h*w)
+        superpixel_loss = config.LAMBDA_STRUCTURE * l1_loss(vgg_superpixel, vgg_output) / (c*h*w)
 
         # Content Loss
         vgg_photo = VGG(sample_photo)
-        content_loss = 200 * l1_loss(vgg_photo, vgg_output) / (c*h*w)
+        content_loss = config.LAMBDA_CONTENT * l1_loss(vgg_photo, vgg_output) / (c*h*w)
 
         # Variation Loss
-        tv_loss = 10000.0 * VariationLoss(output_photo)
+        tv_loss = config.LAMBDA_VARIATION * var_loss(output_photo)
 
         g_loss_total = g_loss_surface + g_loss_texture + superpixel_loss + content_loss + tv_loss
 
@@ -146,6 +146,7 @@ def main():
     #BCE_Loss = nn.BCELoss()
     L1_Loss = nn.L1Loss()
     MSE_Loss = nn.MSELoss() # went through the author's code and found him using LSGAN, LSGAN should gives better training
+    var_loss = VariationLoss(1)
     
     train_dataset = MyDataset(config.TRAIN_PHOTO_DIR, config.TRAIN_CARTOON_DIR)
     train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True, num_workers=config.NUM_WORKERS)
@@ -158,7 +159,7 @@ def main():
     # Do the training
     for epoch in range(config.NUM_EPOCHS):
         train_fn(disc_texture, disc_surface, gen, train_loader, opt_disc, opt_gen, L1_Loss, MSE_Loss, 
-                VGG19, extract_structure, extract_texture, extract_surface)
+                VGG19, extract_structure, extract_texture, extract_surface, var_loss)
         if config.SAVE_MODEL and epoch % 5 == 0:
             save_checkpoint(gen, opt_gen, epoch, folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
 

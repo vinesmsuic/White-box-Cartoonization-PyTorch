@@ -227,41 +227,6 @@ class HierarchicalGrouping(object):
     def num_regions(self):
         return len(self.s.keys())
 
-def _calculate_color_sim(ri, rj):
-    """
-        Calculate color similarity using histogram intersection
-    """
-    return sum([min(a, b) for a, b in zip(ri["color_hist"], rj["color_hist"])])
-
-
-def _calculate_texture_sim(ri, rj):
-    """
-        Calculate texture similarity using histogram intersection
-    """
-    return sum([min(a, b) for a, b in zip(ri["texture_hist"], rj["texture_hist"])])
-
-
-def _calculate_size_sim(ri, rj, imsize):
-    """
-        Size similarity boosts joint between small regions, which prevents
-        a single region from engulfing other blobs one by one.
-        size (ri, rj) = 1 − [size(ri) + size(rj)] / size(image)
-    """
-    return 1.0 - (ri['size'] + rj['size']) / imsize
-
-
-def _calculate_fill_sim(ri, rj, imsize):
-    """
-        Fill similarity measures how well ri and rj fit into each other.
-        BBij is the bounding box around ri and rj.
-        fill(ri, rj) = 1 − [size(BBij) − size(ri) − size(ri)] / size(image)
-    """
-
-    bbsize = (max(ri['box'][2], rj['box'][2]) - min(ri['box'][0], rj['box'][0])) * (max(ri['box'][3], rj['box'][3]) - min(ri['box'][1], rj['box'][1]))
-
-    return 1.0 - (bbsize - ri['size'] - rj['size']) / imsize
-
-
 def calculate_color_hist(mask, img):
     """
         Calculate colour histogram for the region.
@@ -340,6 +305,40 @@ def calculate_sim(ri, rj, imsize, sim_strategy):
         sim += _calculate_fill_sim(ri, rj, imsize)
 
     return sim
+
+def _calculate_color_sim(ri, rj):
+    """
+        Calculate color similarity using histogram intersection
+    """
+    return sum([min(a, b) for a, b in zip(ri["color_hist"], rj["color_hist"])])
+
+
+def _calculate_texture_sim(ri, rj):
+    """
+        Calculate texture similarity using histogram intersection
+    """
+    return sum([min(a, b) for a, b in zip(ri["texture_hist"], rj["texture_hist"])])
+
+
+def _calculate_size_sim(ri, rj, imsize):
+    """
+        Size similarity boosts joint between small regions, which prevents
+        a single region from engulfing other blobs one by one.
+        size (ri, rj) = 1 − [size(ri) + size(rj)] / size(image)
+    """
+    return 1.0 - (ri['size'] + rj['size']) / imsize
+
+
+def _calculate_fill_sim(ri, rj, imsize):
+    """
+        Fill similarity measures how well ri and rj fit into each other.
+        BBij is the bounding box around ri and rj.
+        fill(ri, rj) = 1 − [size(BBij) − size(ri) − size(ri)] / size(image)
+    """
+
+    bbsize = (max(ri['box'][2], rj['box'][2]) - min(ri['box'][0], rj['box'][0])) * (max(ri['box'][3], rj['box'][3]) - min(ri['box'][1], rj['box'][1]))
+
+    return 1.0 - (bbsize - ri['size'] - rj['size']) / imsize
 
 
 if __name__ == "__main__":
