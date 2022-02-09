@@ -35,7 +35,8 @@ class ColorShift(nn.Module):
         # images * self.weights[None, :, None, None] => Apply weights to r,g,b channels of each images
         # torch.sum(, dim=1) => Sum along the channels so (B, 3, H, W) become (B, H, W)
         # .unsqueeze(1) => add back the channel so (B, H, W) become (B, 1, H, W)
-        return ((((torch.sum(images * self.weights[None, :, None, None], dim= 1)) / self.weights.sum()).unsqueeze(1)) for images in image_batches)
+        # .repeat(1, 3, 1, 1) => (B, 1, H, W) become (B, 3, H, W) again
+        return ((((torch.sum(images * self.weights[None, :, None, None], dim= 1)) / self.weights.sum()).unsqueeze(1)).repeat(1, 3, 1, 1) for images in image_batches)
             
 
 if __name__ == "__main__":
@@ -43,4 +44,4 @@ if __name__ == "__main__":
     input1 = torch.randn(5,3,256,256)
     input2 = torch.randn(5,3,256,256)
     result1, result2 = color_shift(input1, input2)
-    print(result1.shape, result2.shape) #torch.Size([5, 1, 256, 256]) torch.Size([5, 1, 256, 256])
+    print(result1.shape, result2.shape) #torch.Size([5, 3, 256, 256]) torch.Size([5, 3, 256, 256])
