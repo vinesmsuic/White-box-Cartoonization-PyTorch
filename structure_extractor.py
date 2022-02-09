@@ -97,7 +97,8 @@ def color_ss_map(image, seg_num=200, power=1.2, k=10, sim_strategy='CTSF'):
     
     return image
 
-def selective_adacolor(batch_image, seg_num=200, power=1.2):
+# Paper used power = 1.2 if we stick with power=1 here
+def selective_adacolor(batch_image, seg_num=200, power=1):
     num_job = np.shape(batch_image)[0]
     batch_out = Parallel(n_jobs=num_job)(delayed(color_ss_map)\
                          (image, seg_num, power) for image in batch_image)

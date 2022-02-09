@@ -30,13 +30,13 @@ class ColorShift(nn.Module):
     #So we can do: gray_fake, gray_cartoon = ColorShift(output, input_cartoon)
     def forward(self, *image_batches: torch.Tensor):
         # Sample the random color shift coefficients
-        self.weights = self.dist.sample()
+        weights = self.dist.sample()
 
-        # images * self.weights[None, :, None, None] => Apply weights to r,g,b channels of each images
+        # images * weights[None, :, None, None] => Apply weights to r,g,b channels of each images
         # torch.sum(, dim=1) => Sum along the channels so (B, 3, H, W) become (B, H, W)
         # .unsqueeze(1) => add back the channel so (B, H, W) become (B, 1, H, W)
         # .repeat(1, 3, 1, 1) => (B, 1, H, W) become (B, 3, H, W) again
-        return ((((torch.sum(images * self.weights[None, :, None, None], dim= 1)) / self.weights.sum()).unsqueeze(1)).repeat(1, 3, 1, 1) for images in image_batches)
+        return ((((torch.sum(images * weights[None, :, None, None], dim= 1)) / weights.sum()).unsqueeze(1)).repeat(1, 3, 1, 1) for images in image_batches)
             
 
 if __name__ == "__main__":

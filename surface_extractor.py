@@ -6,7 +6,7 @@ class GuidedFilter(nn.Module):
     def box_filter(self, x, r):
         channel =  x.shape[1] # Batch, Channel, H, W
         kernel_size = (2*r+1)
-        weight = 1/(kernel_size**2)
+        weight = 1.0/(kernel_size**2)
         box_kernel = weight*torch.ones((channel, 1, kernel_size, kernel_size), dtype=torch.float32, device=x.device)
         output = F.conv2d(x, weight=box_kernel, stride=1, padding=r, groups=channel) #tf.nn.depthwise_conv2d(x, box_kernel, [1, 1, 1, 1], 'SAME')
 
