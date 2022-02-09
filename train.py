@@ -66,16 +66,16 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
         blur_cartoon = extract_surface(sample_cartoon, sample_cartoon, r=5, eps=2e-1)
         D_blur_real = disc_surface(blur_cartoon)
         D_blur_fake = disc_surface(blur_fake)
-        d_loss_surface_real = l1_loss(D_blur_real, torch.ones_like(D_blur_real))
-        d_loss_surface_fake = l1_loss(D_blur_fake, torch.zeros_like(D_blur_fake))
+        d_loss_surface_real = mse(D_blur_real, torch.ones_like(D_blur_real))
+        d_loss_surface_fake = mse(D_blur_fake, torch.zeros_like(D_blur_fake))
         d_loss_surface = (d_loss_surface_real + d_loss_surface_fake)/2.0
 
         # Textural Representation
         gray_fake, gray_cartoon = extract_texture(output_photo, sample_cartoon)
         D_gray_real = disc_texture(gray_cartoon)
         D_gray_fake = disc_texture(gray_fake)
-        d_loss_texture_real = l1_loss(D_gray_real, torch.ones_like(D_gray_real))
-        d_loss_texture_fake = l1_loss(D_gray_fake, torch.zeros_like(D_gray_fake))
+        d_loss_texture_real = mse(D_gray_real, torch.ones_like(D_gray_real))
+        d_loss_texture_fake = mse(D_gray_fake, torch.zeros_like(D_gray_fake))
         d_loss_texture = (d_loss_texture_real + d_loss_texture_fake)/2.0
 
         d_loss_total = d_loss_surface + d_loss_texture
@@ -93,12 +93,12 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
         # Guided Filter
         blur_fake = extract_surface(output_photo, output_photo, r=5, eps=2e-1)
         D_blur_fake = disc_surface(blur_fake)
-        g_loss_surface = config.LAMBDA_SURFACE * l1_loss(D_blur_fake, torch.zeros_like(D_blur_fake))
+        g_loss_surface = config.LAMBDA_SURFACE * mse(D_blur_fake, torch.ones_like(D_blur_fake))
 
         # Color Shift
         gray_fake, = extract_texture(output_photo)
         D_gray_fake = disc_texture(gray_fake)
-        g_loss_texture = config.LAMBDA_TEXTURE * l1_loss(D_gray_fake, torch.zeros_like(D_gray_fake))
+        g_loss_texture = config.LAMBDA_TEXTURE * mse(D_gray_fake, torch.ones_like(D_gray_fake))
 
         # SuperPixel
         input_superpixel = extract_structure(output_photo.detach())
@@ -145,7 +145,7 @@ def main():
     VGG19 = VGG19.to(config.DEVICE)
     VGG19.eval()
 
-    extract_structure = SuperPixel(config.DEVICE, mode='simple')
+    extract_structure = SuperPixel(config.DEVICE, mode='sscolor')
     extract_texture = ColorShift(config.DEVICE, mode='uniform', image_format='rgb')
     extract_surface = GuidedFilter()
 
@@ -157,17 +157,36 @@ def main():
     train_dataset = MyDataset(config.TRAIN_PHOTO_DIR, config.TRAIN_CARTOON_DIR)
     train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True, num_workers=config.NUM_WORKERS)
 
+    if config.LOAD_MODEL:
+        is_gen_loaded = load_checkpoint(
+            gen, opt_gen, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_GEN
+        )
+        is_disc_loaded = load_checkpoint(
+            disc_texture, opt_disc, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_DISC
+        )
+        is_disc_loaded = load_checkpoint(
+            disc_surface, opt_disc, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_DISC
+        )
+
     # Initialization Phase
-    initialization_phase(gen, train_loader, opt_gen, L1_Loss, VGG19, config.PRETRAIN_EPOCHS)
-    if config.SAVE_MODEL:
-        save_checkpoint(gen, opt_gen, 'i', folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
+    if not(is_gen_loaded):
+        print("="*80)
+        print("=> Initialization Phase")
+        initialization_phase(gen, train_loader, opt_gen, L1_Loss, VGG19, config.PRETRAIN_EPOCHS)
+        print("Finished Initialization Phase")
+        print("="*80)
+
+        if config.SAVE_MODEL:
+            save_checkpoint(gen, opt_gen, 'i', folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
 
     # Do the training
+    print("=> Start Training")
     for epoch in range(config.NUM_EPOCHS):
         train_fn(disc_texture, disc_surface, gen, train_loader, opt_disc, opt_gen, L1_Loss, MSE_Loss, 
                 VGG19, extract_structure, extract_texture, extract_surface, var_loss)
         if config.SAVE_MODEL and epoch % 5 == 0:
             save_checkpoint(gen, opt_gen, epoch, folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
+    print("training end")
 
 
 if __name__ == "__main__":

@@ -15,17 +15,28 @@ VAL_PHOTO_DIR = os.path.join(VAL_DIR, "photo")
 RESULT_TRAIN_DIR = os.path.join("results", "train")
 RESULT_TEST_DIR = os.path.join("results", "test")
 
-#BATCH_SIZE = 16 # Paper used Batch size = 16
+#Paper Configuration:
+#BATCH_SIZE = 16
+#LEARNING_RATE = 2e-4
+#=============================
 BATCH_SIZE = 1
 LEARNING_RATE = 2e-4
+#=============================
 
 # LAMBDA values
-LAMBDA_SURFACE = 1.0
-LAMBDA_TEXTURE = 10
-LAMBDA_STRUCTURE = 2000
-LAMBDA_CONTENT = 2000
+#Paper Configuration:
+#LAMBDA_SURFACE = 1.0 #(author's code used 0.1)
+#LAMBDA_TEXTURE = 10 #(author's code used 1)
+#LAMBDA_STRUCTURE = 2000 #(author's code used 200)
+#LAMBDA_CONTENT = 2000 #(author's code used 200)
+#LAMBDA_VARIATION = 10000
+#=============================
+LAMBDA_SURFACE = 0.1
+LAMBDA_TEXTURE = 1
+LAMBDA_STRUCTURE = 200
+LAMBDA_CONTENT = 200
 LAMBDA_VARIATION = 10000
-
+#=============================
 
 NUM_WORKERS = 8
 IMAGE_SIZE = 256

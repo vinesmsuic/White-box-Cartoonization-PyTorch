@@ -39,6 +39,7 @@ def load_checkpoint(model, optimizer, lr, folder, checkpoint_file):
         for param_group in optimizer.param_groups:
             param_group["lr"] = lr
 
+        print("checkpoint file " + str(path) + " loaded.")
         loaded = True
     else:
         print("checkpoint file " + str(path) + " not found. Not loading checkpoint.")
