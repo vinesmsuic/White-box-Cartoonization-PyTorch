@@ -1,4 +1,4 @@
-# CartoonGAN (PyTorch)
+# White-box-Cartoonization (PyTorch)
 
 Unofficial PyTorch implementation of White-box-Cartoonization. We followed the original Tensorflow training implementation from the paper author ([Xinrui Wang](https://github.com/SystemErrorWang/White-box-Cartoonization)).
 
