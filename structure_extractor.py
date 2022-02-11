@@ -8,20 +8,19 @@ from joblib import Parallel, delayed
 import torch
 import torch.nn as nn
 
-class SuperPixel(nn.Module):
+class SuperPixel():
     def __init__(self, device: torch.device='cpu', mode='simple'):
-        super().__init__()
         self.device = device
         self.mode = mode
 
-    def forward(self, x: torch.Tensor):
+    def process(self, x: torch.Tensor):
         # B, C, H, W => B, H, W, C
         # Torch => Numpy
         skimage_format_tensor = x.permute((0, 2, 3, 1)).cpu().numpy()
 
         if(self.mode == 'simple'):
             skimage_format_tensor = simple_superpixel(skimage_format_tensor)
-        else:
+        elif(self.mode == 'sscolor'):
             skimage_format_tensor = selective_adacolor(skimage_format_tensor)
 
         # B, H, W, C => B, C, H, W
@@ -92,7 +91,8 @@ def color_ss_map(image, seg_num=200, power=1.2, k=10, sim_strategy='CTSF'):
     image = label2rgb(S.img_seg, image, kind='mix')
     image = (image+1)/2
     image = image**power
-    image = image/np.max(image)
+    if(not np.max(image)==0):
+        image = image/np.max(image)
     image = image*2 - 1
     
     return image
@@ -345,5 +345,5 @@ def _calculate_fill_sim(ri, rj, imsize):
 if __name__ == "__main__":
     super_pixel = SuperPixel(mode='sscolor')
     input = torch.randn(5,3,256,256)
-    result = super_pixel(input)
+    result = super_pixel.process(input)
     print(result.shape)

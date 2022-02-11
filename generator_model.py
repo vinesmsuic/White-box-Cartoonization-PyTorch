@@ -8,12 +8,12 @@ import torch.nn.functional as F
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, channels, kernel_size, stride, padding):
+    def __init__(self, channels, kernel_size, stride, padding, padding_mode):
         super().__init__()
         self.block = nn.Sequential(
-            nn.Conv2d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, padding_mode="zeros"),
+            nn.Conv2d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, padding_mode=padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
-            nn.Conv2d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, padding_mode="zeros"),
+            nn.Conv2d(channels, channels, kernel_size=kernel_size, stride=stride, padding=padding, padding_mode=padding_mode),
         )
 
     def forward(self, x):
@@ -23,60 +23,62 @@ class ResidualBlock(nn.Module):
 class Generator(nn.Module):
     def __init__(self, img_channels, num_features=32, num_residuals=4):
         super().__init__()
+        self.padding_mode = "zeros"
+
         self.initial_down = nn.Sequential(
             #k7n32s1
-            nn.Conv2d(img_channels, num_features, kernel_size=7, stride=1, padding=3, padding_mode="zeros"),
+            nn.Conv2d(img_channels, num_features, kernel_size=7, stride=1, padding=3, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
         )
 
         #Down-convolution
         self.down1 = nn.Sequential(
             #k3n32s2
-            nn.Conv2d(num_features, num_features, kernel_size=3, stride=2, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features, num_features, kernel_size=3, stride=2, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
 
             #k3n64s1
-            nn.Conv2d(num_features, num_features*2, kernel_size=3, stride=1, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features, num_features*2, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
         )
 
         self.down2 = nn.Sequential(
             #k3n64s2
-            nn.Conv2d(num_features*2, num_features*2, kernel_size=3, stride=2, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features*2, num_features*2, kernel_size=3, stride=2, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
 
             #k3n128s1
-            nn.Conv2d(num_features*2, num_features*4, kernel_size=3, stride=1, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features*2, num_features*4, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
         )
 
         #Bottleneck: 4 residual blocks => 4 times [K3n128s1]
         self.res_blocks = nn.Sequential(
-            *[ResidualBlock(num_features*4, kernel_size=3, stride=1, padding=1) for _ in range(num_residuals)]
+            *[ResidualBlock(num_features*4, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode) for _ in range(num_residuals)]
         )
 
         #Up-convolution
         self.up1 = nn.Sequential(
             #k3n128s1 (should be k3n64s1?)
-            nn.Conv2d(num_features*4, num_features*2, kernel_size=3, stride=1, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features*4, num_features*2, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
         )
 
         self.up2 = nn.Sequential(
             #k3n64s1
-            nn.Conv2d(num_features*2, num_features*2, kernel_size=3, stride=1, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features*2, num_features*2, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
             #k3n64s1 (should be k3n32s1?)
-            nn.Conv2d(num_features*2, num_features, kernel_size=3, stride=1, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features*2, num_features, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
         )
 
         self.last = nn.Sequential(
             #k3n32s1
-            nn.Conv2d(num_features, num_features, kernel_size=3, stride=1, padding=1, padding_mode="zeros"),
+            nn.Conv2d(num_features, num_features, kernel_size=3, stride=1, padding=1, padding_mode=self.padding_mode),
             nn.LeakyReLU(negative_slope=0.2, inplace=True),
             #k7n3s1
-            nn.Conv2d(num_features, img_channels, kernel_size=7, stride=1, padding=3, padding_mode="zeros")
+            nn.Conv2d(num_features, img_channels, kernel_size=7, stride=1, padding=3, padding_mode=self.padding_mode)
         )
 
     def forward(self, x):
@@ -98,7 +100,7 @@ class Generator(nn.Module):
 def test():
     img_channels = 3
     img_size = 256
-    x = torch.randn((2, img_channels, img_size, img_size))
+    x = torch.randn((5, img_channels, img_size, img_size))
     gen = Generator(img_channels)
     print(gen(x).shape)
 

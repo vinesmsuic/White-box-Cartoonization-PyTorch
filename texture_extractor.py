@@ -1,9 +1,8 @@
 import torch
 import torch.nn as nn
 
-class ColorShift(nn.Module):
+class ColorShift():
     def __init__(self, device: torch.device='cpu', mode='uniform', image_format='rgb'):
-        super().__init__()
         self.dist: torch.distributions = None
         self.dist_param1: torch.Tensor = None
         self.dist_param2: torch.Tensor = None
@@ -28,7 +27,7 @@ class ColorShift(nn.Module):
         
     #Allow taking mutiple images batches as input
     #So we can do: gray_fake, gray_cartoon = ColorShift(output, input_cartoon)
-    def forward(self, *image_batches: torch.Tensor):
+    def process(self, *image_batches: torch.Tensor):
         # Sample the random color shift coefficients
         weights = self.dist.sample()
 
@@ -43,5 +42,5 @@ if __name__ == "__main__":
     color_shift = ColorShift()
     input1 = torch.randn(5,3,256,256)
     input2 = torch.randn(5,3,256,256)
-    result1, result2 = color_shift(input1, input2)
+    result1, result2 = color_shift.process(input1, input2)
     print(result1.shape, result2.shape) #torch.Size([5, 3, 256, 256]) torch.Size([5, 3, 256, 256])

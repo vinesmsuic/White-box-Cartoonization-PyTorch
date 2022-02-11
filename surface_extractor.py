@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-class GuidedFilter(nn.Module):
+class GuidedFilter():
     def box_filter(self, x, r):
         channel =  x.shape[1] # Batch, Channel, H, W
         kernel_size = (2*r+1)
@@ -33,7 +33,7 @@ class GuidedFilter(nn.Module):
         output = mean_A * x + mean_b
         return output
 
-    def forward(self, x: torch.Tensor, y: torch.Tensor, r, eps=1e-2):
+    def process(self, x: torch.Tensor, y: torch.Tensor, r, eps=1e-2):
         return self.guided_filter(x, y, r, eps)
 
 
@@ -41,5 +41,5 @@ class GuidedFilter(nn.Module):
 if __name__ == "__main__":
     guided_filter = GuidedFilter()
     input = torch.randn(5,3,256,256)
-    result = guided_filter(input, input, r=5)
+    result = guided_filter.process(input, input, r=5)
     print(result.shape)

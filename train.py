@@ -61,21 +61,21 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
             # Train Discriminator
             fake_cartoon = gen(sample_photo)
-            output_photo = extract_surface(sample_photo, fake_cartoon, r=1)
+            output_photo = extract_surface.process(sample_photo, fake_cartoon, r=1)
 
             # Surface Representation
-            blur_fake = extract_surface(output_photo, output_photo, r=5, eps=2e-1)
-            blur_cartoon = extract_surface(sample_cartoon, sample_cartoon, r=5, eps=2e-1)
+            blur_fake = extract_surface.process(output_photo, output_photo, r=5, eps=2e-1)
+            blur_cartoon = extract_surface.process(sample_cartoon, sample_cartoon, r=5, eps=2e-1)
             D_blur_real = disc_surface(blur_cartoon)
-            D_blur_fake = disc_surface(blur_fake)
+            D_blur_fake = disc_surface(blur_fake.detach())
             d_loss_surface_real = mse(D_blur_real, torch.ones_like(D_blur_real))
             d_loss_surface_fake = mse(D_blur_fake, torch.zeros_like(D_blur_fake))
             d_loss_surface = (d_loss_surface_real + d_loss_surface_fake)/2.0
 
             # Textural Representation
-            gray_fake, gray_cartoon = extract_texture(output_photo, sample_cartoon)
+            gray_fake, gray_cartoon = extract_texture.process(output_photo, sample_cartoon)
             D_gray_real = disc_texture(gray_cartoon)
-            D_gray_fake = disc_texture(gray_fake)
+            D_gray_fake = disc_texture(gray_fake.detach())
             d_loss_texture_real = mse(D_gray_real, torch.ones_like(D_gray_real))
             d_loss_texture_fake = mse(D_gray_fake, torch.zeros_like(D_gray_fake))
             d_loss_texture = (d_loss_texture_real + d_loss_texture_fake)/2.0
@@ -90,20 +90,20 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
             # Train Generator
             fake_cartoon = gen(sample_photo)
-            output_photo = extract_surface(sample_photo, fake_cartoon, r=1)
+            output_photo = extract_surface.process(sample_photo, fake_cartoon, r=1)
 
             # Guided Filter
-            blur_fake = extract_surface(output_photo, output_photo, r=5, eps=2e-1)
+            blur_fake = extract_surface.process(output_photo, output_photo, r=5, eps=2e-1)
             D_blur_fake = disc_surface(blur_fake)
             g_loss_surface = config.LAMBDA_SURFACE * mse(D_blur_fake, torch.ones_like(D_blur_fake))
 
             # Color Shift
-            gray_fake, = extract_texture(output_photo)
+            gray_fake, = extract_texture.process(output_photo)
             D_gray_fake = disc_texture(gray_fake)
             g_loss_texture = config.LAMBDA_TEXTURE * mse(D_gray_fake, torch.ones_like(D_gray_fake))
 
             # SuperPixel
-            input_superpixel = extract_structure(output_photo.detach())
+            input_superpixel = extract_structure.process(output_photo.detach())
             vgg_output = VGG(output_photo)
             _, c, h, w = vgg_output.shape
             vgg_superpixel = VGG(input_superpixel)
@@ -126,17 +126,28 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
             
 
-            if step % 200 == 0:
-                save_image(blur_fake*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_surface.png"))
-                save_image(gray_fake*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_texture.png"))
-                save_image(input_superpixel*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_structure.png"))
-                
+            if step % config.SAVE_IMG_PER_STEP == 0:
+                save_image(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_rep.png"))
+                #save_image(blur_fake*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_surface.png"))
+                #save_image(gray_fake*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_texture.png"))
+                #save_image(input_superpixel*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_structure.png"))
+                #save_image(output_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_output.png"))
+
                 save_image(sample_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo.png"))
                 save_image(fake_cartoon*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_fakecartoon.png"))
 
+                print('[Epoch: %d| Step: %d] - D Surface loss: %.12f' % ((epoch + 1), (step+1), d_loss_surface.item()))
+                print('[Epoch: %d| Step: %d] - D Texture loss: %.12f' % ((epoch + 1), (step+1), d_loss_texture.item()))
+
+                print('[Epoch: %d| Step: %d] - G Surface loss: %.12f' % ((epoch + 1), (step+1), g_loss_surface.item()))
+                print('[Epoch: %d| Step: %d] - G Texture loss: %.12f' % ((epoch + 1), (step+1), g_loss_texture.item()))
+                print('[Epoch: %d| Step: %d] - G Structure loss: %.12f' % ((epoch + 1), (step+1), superpixel_loss.item()))
+                print('[Epoch: %d| Step: %d] - G Content loss: %.12f' % ((epoch + 1), (step+1), content_loss.item()))
+                print('[Epoch: %d| Step: %d] - G Variation loss: %.12f' % ((epoch + 1), (step+1), tv_loss.item()))
+
             step += 1
 
-            loop.set_postfix(step=step+1, epoch=epoch+1)
+            loop.set_postfix(step=step, epoch=epoch+1)
 
     if config.SAVE_MODEL and epoch % 5 == 0:
         save_checkpoint(gen, opt_gen, epoch, folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
