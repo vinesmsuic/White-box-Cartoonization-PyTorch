@@ -107,11 +107,15 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
             vgg_output = VGG(output_photo)
             _, c, h, w = vgg_output.shape
             vgg_superpixel = VGG(input_superpixel)
-            superpixel_loss = config.LAMBDA_STRUCTURE * l1_loss(vgg_superpixel, vgg_output) / (c*h*w)
+            superpixel_loss = config.LAMBDA_STRUCTURE * l1_loss(vgg_superpixel, vgg_output)*255 / (c*h*w)
+            #^ Original author used CaffeVGG model which took (0-255)BGR images as input,
+            # while we used PyTorch model which takes (0-1)BGB images as input. Therefore we multply the l1 with 255.
 
             # Content Loss
             vgg_photo = VGG(sample_photo)
-            content_loss = config.LAMBDA_CONTENT * l1_loss(vgg_photo, vgg_output) / (c*h*w)
+            content_loss = config.LAMBDA_CONTENT * l1_loss(vgg_photo, vgg_output)*255 / (c*h*w)
+            #^ Original author used CaffeVGG model which took (0-255)BGR images as input,
+            # while we used PyTorchVGG model which takes (0-1)BGB images as input. Therefore we multply the l1 with 255.
 
             # Variation Loss
             tv_loss = config.LAMBDA_VARIATION * var_loss(output_photo)

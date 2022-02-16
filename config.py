@@ -55,7 +55,7 @@ CHECKPOINT_GEN = "gen.pth.tar"
 VGG_WEIGHTS = "vgg19-dcbb9e9d.pth"
 
 #SAVE_IMG_PER_STEP = 200
-SAVE_IMG_PER_STEP = 200
+SAVE_IMG_PER_STEP = 100
 
 LOAD_CHECKPOINT_DISC = "i_disc.pth.tar"
 LOAD_CHECKPOINT_GEN = "i_gen.pth.tar"
@@ -66,7 +66,7 @@ transform_photo = A.Compose(
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
         #A.HorizontalFlip(p=0.5),
         #A.RandomBrightnessContrast(p=0.2),
-        A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255.0,),
+        A.Normalize(),
         ToTensorV2(),
     ]
 )
@@ -74,7 +74,7 @@ transform_photo = A.Compose(
 transform_train = A.Compose(
     [
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
-        A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255.0,),
+        A.Normalize(),
         ToTensorV2(),
     ]
 )
@@ -82,7 +82,7 @@ transform_train = A.Compose(
 transform_test = A.Compose(
     [
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
-        A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255.0,),
+        A.Normalize(),
         ToTensorV2(),
     ]
 )

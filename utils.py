@@ -24,6 +24,7 @@ def save_checkpoint(model, optimizer, epoch, folder, filename="my_checkpoint.pth
     }
     path = os.path.join(folder, str(epoch) + "_" + filename)
     torch.save(checkpoint, path)
+    print("=> checkpoint saved: " + str(path))
 
 
 def load_checkpoint(model, optimizer, lr, folder, checkpoint_file):
