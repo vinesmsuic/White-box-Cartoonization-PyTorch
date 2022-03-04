@@ -32,3 +32,19 @@ class MyDataset(Dataset):
         B_img = config.transform_train(image=B_img)["image"]
 
         return A_img, B_img
+
+class MyTestDataset(Dataset):
+    def __init__(self, root_A):
+        self.root_A = root_A
+        self.A_images = os.listdir(root_A)
+        self.A_len = len(self.A_images)
+
+    def __len__(self):
+        return self.A_len
+
+    def __getitem__(self, index):
+        A_img = self.A_images[index % self.A_len]
+        A_path = os.path.join(self.root_A, A_img)
+        A_img = np.array(Image.open(A_path).convert("RGB"))
+        A_img = config.transform_test(image=A_img)["image"]
+        return A_img

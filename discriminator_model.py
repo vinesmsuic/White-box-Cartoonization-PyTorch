@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-from torch.nn.utils.parametrizations import spectral_norm
+#from torch.nn.utils.parametrizations import spectral_norm
+from torch.nn.utils import spectral_norm
 
 # PyTorch implementation by vinesmsuic
 # Referenced from official tensorflow implementation: https://github.com/SystemErrorWang/White-box-Cartoonization/blob/master/train_code/network.py

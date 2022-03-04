@@ -5,18 +5,39 @@ import copy
 import os
 from torchvision.utils import save_image
 
-def save_test_examples(gen, val_loader, epoch, folder):
-    x = next(iter(val_loader))
-    x = x.to(config.DEVICE)
+
+def save_training_images(image, epoch, step, folder, suffix_filename:str):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+    save_image(image, os.path.join(folder, f"epoch_{epoch}_step_{step}_{suffix_filename}.png"))
+
+
+def save_val_examples(gen, val_loader, epoch, step, folder, num_samples=1, concat_image=True):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     gen.eval()
     with torch.no_grad():
-        y_fake = gen(x)
-        y_fake = y_fake * 0.5 + 0.5  # remove normalization#
-        save_image(y_fake, os.path.join(folder, f"y_gen_{epoch}.png"))
-        save_image(x * 0.5 + 0.5, os.path.join(folder, f"input_{epoch}.png"))
+        num_saved = 0
+        for _, (x) in enumerate(val_loader):
+            x = x.to(config.DEVICE)
+            y_fake = gen(x)
+
+            if(concat_image):
+                save_image(torch.cat((x * 0.5 + 0.5,y_fake * 0.5 + 0.5), axis=3), os.path.join(folder, f"epoch_{epoch}_step_{step}_io{num_saved}.png"))
+            else:
+                save_image(y_fake * 0.5 + 0.5, os.path.join(folder, f"epoch_{epoch}_step_{step}_gen{num_saved}.png"))
+                save_image(x * 0.5 + 0.5, os.path.join(folder, f"epoch_{epoch}_step_{step}_input{num_saved}.png"))
+
+            num_saved += 1
+            if(num_saved == num_samples):
+                break
     gen.train()
 
 def save_checkpoint(model, optimizer, epoch, folder, filename="my_checkpoint.pth.tar"):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
     print("=> Saving checkpoint")
     checkpoint = {
         "state_dict": model.state_dict(),
@@ -63,22 +84,3 @@ def seed_everything(seed=42):
     torch.cuda.manual_seed_all(seed)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
-def tensor2im(input_image, imtype=np.uint8):
-    """"Converts a Tensor array into a numpy image array.
-    Parameters:
-        input_image (tensor) --  the input image tensor array
-        imtype (type)        --  the desired type of the converted numpy array
-    """
-    if not isinstance(input_image, np.ndarray):
-        if isinstance(input_image, torch.Tensor):  # get the data from a variable
-            image_tensor = input_image.data
-        else:
-            return input_image
-        image_numpy = image_tensor[0].cpu().float().numpy()  # convert it into a numpy array
-        if image_numpy.shape[0] == 1:  # grayscale to RGB
-            image_numpy = np.tile(image_numpy, (3, 1, 1))
-        image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0  # post-processing: tranpose and scaling
-    else:  # if it is a numpy array, do nothing
-        image_numpy = input_image
-    return image_numpy.astype(imtype)

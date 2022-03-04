@@ -3,14 +3,14 @@ import torch.nn as nn
 import torch.optim as optim
 import config
 import os
-from dataset import MyDataset
+from dataset import MyDataset, MyTestDataset
 from generator_model import Generator
 from discriminator_model import Discriminator
 from VGGNet import VGGNet
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torchvision.utils import save_image
-from utils import save_test_examples, load_checkpoint, save_checkpoint
+from utils import save_val_examples, load_checkpoint, save_checkpoint, save_training_images
 from losses import VariationLoss
 from structure_extractor import SuperPixel
 from texture_extractor import ColorShift
@@ -41,13 +41,14 @@ def initialization_phase(gen, loader, opt_gen, l1_loss, VGG, pretrain_epochs):
 
         print('[%d/%d] - Recon loss: %.8f' % ((epoch + 1), pretrain_epochs, torch.mean(torch.FloatTensor(losses))))
         
-        save_image(sample_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, str(epoch + 1) + "_initialization_phase_photo.png"))
-        save_image(reconstructed*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, str(epoch + 1) + "_initialization_phase_reconstructed.png"))
-        
+        save_training_images(torch.cat((sample_photo*0.5+0.5,reconstructed*0.5+0.5), axis=3),
+                                                epoch=epoch, step=0, folder=config.RESULT_TRAIN_DIR, suffix_filename="initial_io")
     
-
+    if config.SAVE_MODEL:
+        save_checkpoint(gen, opt_gen, 'i', folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
+    
 def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss, mse,
-             VGG, extract_structure, extract_texture, extract_surface, var_loss):
+             VGG, extract_structure, extract_texture, extract_surface, var_loss, val_loader):
 
     step = 0
     
@@ -127,18 +128,14 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
             opt_gen.step()
 
             #===============================================================================
-
-            
-
             if step % config.SAVE_IMG_PER_STEP == 0:
-                save_image(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_rep.png"))
-                #save_image(blur_fake*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_surface.png"))
-                #save_image(gray_fake*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_texture.png"))
-                #save_image(input_superpixel*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_structure.png"))
-                #save_image(output_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo_output.png"))
+                save_training_images(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), epoch=epoch, step=step, folder=config.RESULT_TRAIN_DIR, suffix_filename="photo_rep")
 
-                save_image(sample_photo*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_photo.png"))
-                save_image(fake_cartoon*0.5+0.5, os.path.join(config.RESULT_TRAIN_DIR, "step_" + str(step+1) + "_fakecartoon.png"))
+                save_training_images(torch.cat((sample_photo*0.5+0.5,fake_cartoon*0.5+0.5), axis=3),
+                                                epoch=epoch, step=step, folder=config.RESULT_TRAIN_DIR, suffix_filename="io")
+
+                save_val_examples(gen=gen, val_loader=val_loader, 
+                                  epoch=epoch, step=step, folder=config.RESULT_VAL_DIR, num_samples=5, concat_image=True)
 
                 print('[Epoch: %d| Step: %d] - D Surface loss: %.12f' % ((epoch + 1), (step+1), d_loss_surface.item()))
                 print('[Epoch: %d| Step: %d] - D Texture loss: %.12f' % ((epoch + 1), (step+1), d_loss_texture.item()))
@@ -153,11 +150,16 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
             loop.set_postfix(step=step, epoch=epoch+1)
 
-    if config.SAVE_MODEL and epoch % 5 == 0:
-        save_checkpoint(gen, opt_gen, epoch, folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
+        if config.SAVE_MODEL and epoch % config.SAVE_MODEL_FREQ == 0:
+            save_checkpoint(gen, opt_gen, epoch, folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
+            save_checkpoint(disc_texture, opt_disc, epoch, folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_DISC)
+
+    if config.SAVE_MODEL:
+        save_checkpoint(gen, opt_gen, epoch, folder=config.CHECKPOINT_FOLDER, filename="last_"+config.CHECKPOINT_GEN)
+        save_checkpoint(disc_texture, opt_disc, epoch, folder=config.CHECKPOINT_FOLDER, filename="last_"+config.CHECKPOINT_DISC)
 
 def main():
-    print(config.DEVICE)
+    print("Using Device: " + config.DEVICE)
     disc_texture = Discriminator(in_channels=3).to(config.DEVICE)
     disc_surface = Discriminator(in_channels=3).to(config.DEVICE)
     gen = Generator(img_channels=3).to(config.DEVICE)
@@ -181,6 +183,9 @@ def main():
     train_dataset = MyDataset(config.TRAIN_PHOTO_DIR, config.TRAIN_CARTOON_DIR)
     train_loader = DataLoader(train_dataset, batch_size=config.BATCH_SIZE, shuffle=True, num_workers=config.NUM_WORKERS)
 
+    val_dataset = MyTestDataset(config.VAL_PHOTO_DIR)
+    val_loader = DataLoader(val_dataset, batch_size=1, shuffle=False, num_workers=config.NUM_WORKERS)
+
     if config.LOAD_MODEL:
         is_gen_loaded = load_checkpoint(
             gen, opt_gen, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_GEN
@@ -200,15 +205,10 @@ def main():
         print("Finished Initialization Phase")
         print("="*80)
 
-        if config.SAVE_MODEL:
-            save_checkpoint(gen, opt_gen, 'i', folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
-
     # Do the training
     print("=> Start Training")
-   
     train_fn(disc_texture, disc_surface, gen, train_loader, opt_disc, opt_gen, L1_Loss, MSE_Loss, 
-            VGG19, extract_structure, extract_texture, extract_surface, var_loss)
-        
+            VGG19, extract_structure, extract_texture, extract_surface, var_loss, val_loader)  
     print("=> Training finished")
 
 
