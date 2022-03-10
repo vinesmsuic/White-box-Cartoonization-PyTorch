@@ -9,7 +9,6 @@ from discriminator_model import Discriminator
 from VGGNet import VGGNet
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from torchvision.utils import save_image
 from utils import save_val_examples, load_checkpoint, save_checkpoint, save_training_images
 from losses import VariationLoss
 from structure_extractor import SuperPixel
@@ -188,13 +187,13 @@ def main():
 
     if config.LOAD_MODEL:
         is_gen_loaded = load_checkpoint(
-            gen, opt_gen, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_GEN
+            gen, opt_gen, config.LEARNING_RATE, path=os.path.join(config.CHECKPOINT_FOLDER, config.LOAD_CHECKPOINT_GEN)
         )
         is_disc_loaded = load_checkpoint(
-            disc_texture, opt_disc, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_DISC
+            disc_texture, opt_disc, config.LEARNING_RATE, path=os.path.join(config.CHECKPOINT_FOLDER, config.LOAD_CHECKPOINT_DISC)
         )
         is_disc_loaded = load_checkpoint(
-            disc_surface, opt_disc, config.LEARNING_RATE, folder=config.CHECKPOINT_FOLDER, checkpoint_file=config.LOAD_CHECKPOINT_DISC
+            disc_surface, opt_disc, config.LEARNING_RATE, path=os.path.join(config.CHECKPOINT_FOLDER, config.LOAD_CHECKPOINT_DISC)
         )
 
     # Initialization Phase

@@ -47,4 +47,4 @@ class MyTestDataset(Dataset):
         A_path = os.path.join(self.root_A, A_img)
         A_img = np.array(Image.open(A_path).convert("RGB"))
         A_img = config.transform_test(image=A_img)["image"]
-        return A_img
+        return A_img, A_path

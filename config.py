@@ -62,22 +62,12 @@ LAMBDA_CONTENT = 200
 LAMBDA_VARIATION = 10000
 #=============================
 
-"""
-transform_photo = A.Compose(
+transform_train = A.Compose(
     [
         #A.RandomCrop(width=IMAGE_SIZE*1.2, height=IMAGE_SIZE*1.2),
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
         #A.HorizontalFlip(p=0.5),
         #A.RandomBrightnessContrast(p=0.2),
-        A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255),
-        ToTensorV2(),
-    ]
-)
-"""
-
-transform_train = A.Compose(
-    [
-        A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
         A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255),
         ToTensorV2(),
     ]
@@ -90,3 +80,4 @@ transform_test = A.Compose(
         ToTensorV2(),
     ]
 )
+
