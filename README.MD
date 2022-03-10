@@ -57,7 +57,7 @@ python train.py
 * [] LR Scheduler
 * [] Loss visualization
 * [] WandB visualization
-* [] Inference Code
+* [x] Inference Code
 * [x] Explaining Code
 
 # Working Environments
