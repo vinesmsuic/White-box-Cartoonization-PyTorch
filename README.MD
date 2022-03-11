@@ -10,9 +10,9 @@ Unofficial PyTorch implementation of White-box-Cartoonization. We followed the o
 
 # Our Results (Demo videos, click on the image)
 
-[![Watch the video](https://img.youtube.com/vi/7qog3Dn4Bug/maxresdefault.jpg)](https://youtu.be/7qog3Dn4Bug)
+[![Watch the video](https://img.youtube.com/vi/7qog3Dn4Bug/0.jpg)](https://youtu.be/7qog3Dn4Bug)
 
-[![Watch the video](https://img.youtube.com/vi/4u3ol6Csvqg/maxresdefault.jpg)](https://youtu.be/4u3ol6Csvqg)
+[![Watch the video](https://img.youtube.com/vi/4u3ol6Csvqg/0.jpg)](https://youtu.be/4u3ol6Csvqg)
 
 # Repo Structure
 
