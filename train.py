@@ -176,7 +176,8 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
             # Variation Loss
             tv_loss = config.LAMBDA_VARIATION * var_loss(output_photo)
-
+            
+            #NOTE Equation 6 in the paper
             g_loss_total = g_loss_surface + g_loss_texture + superpixel_loss + content_loss + tv_loss
 
             opt_gen.zero_grad()

@@ -22,6 +22,8 @@ def parser():
                         help="shuffle test data")
     parser.add_argument('--concat_img', action='store_true',
                         help="concat input and output images instead of separated save files")
+    parser.add_argument('--no_post_processing', action='store_true',
+                        help="disable post_processing (not recommended). This will probably cause output to have terrible noise")
     return parser.parse_args()
 
 def check_arguments_errors(args):
@@ -41,10 +43,11 @@ def test_fn(args):
 
     shuffle = True if(args.shuffle) else False
     concat_img = True if(args.concat_img) else False
+    post_processing = False if(args.no_post_processing) else True
     
     print("=> Saving Test outputs")
     print("="*80)
-    save_test_examples(gen, test_dataset, dest_folder=args.dest_folder, num_samples=args.sample_size, shuffle=shuffle, concat_image=concat_img)
+    save_test_examples(gen, test_dataset, dest_folder=args.dest_folder, num_samples=args.sample_size, shuffle=shuffle, concat_image=concat_img, post_processing=post_processing)
     print(f"=> Finished inferencing {args.sample_size} images")
     print("="*80)
 

@@ -13,6 +13,7 @@ from tqdm import tqdm
 import numpy as np
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
+from surface_extractor import GuidedFilter
 
 def parser():
     parser = argparse.ArgumentParser(description="inference.py: Model inference script of White-box Cartoonization.")
@@ -72,9 +73,18 @@ def get_transform(height, width):
     )
     return transform_inference
 
+#===============================================
+#NOTE Equation 9 in the paper, adjust sharpness of output
+# If no post_processing, noise will be found
+def post_processing(x, G_x):
+    extract_surface = GuidedFilter()
+    return extract_surface.process(x, G_x, r=1)
+#===============================================
+
 def infer_batch(img, model):
     img = img.to(config.DEVICE)
     out = model.forward(img)
+    out = post_processing(img, out)
 
     #TODO fix this later
     unnormalized_out = out*0.5+0.5

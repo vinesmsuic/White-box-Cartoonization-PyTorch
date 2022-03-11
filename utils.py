@@ -4,6 +4,7 @@ import config
 import os
 from torchvision.utils import save_image
 from torch.utils.data import DataLoader
+from surface_extractor import GuidedFilter
 
 def save_training_images(image, epoch, step, dest_folder, suffix_filename:str):
     if not os.path.exists(dest_folder):
@@ -35,7 +36,7 @@ def save_val_examples(gen, val_loader, epoch, step, dest_folder, num_samples=1, 
                 break
     gen.train()
 
-def save_test_examples(gen, test_dataset, dest_folder, num_samples=50, shuffle=False, concat_image=False):
+def save_test_examples(gen, test_dataset, dest_folder, num_samples=50, shuffle=False, concat_image=False, post_processing=True):
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=shuffle, num_workers=config.NUM_WORKERS)
@@ -48,6 +49,9 @@ def save_test_examples(gen, test_dataset, dest_folder, num_samples=50, shuffle=F
                 break
             x = x.to(config.DEVICE)
             y_fake = gen(x)
+            if(post_processing):
+                extract_surface = GuidedFilter()
+                y_fake = extract_surface.process(x, y_fake, r=1)
             if(concat_image):
                 save_image(torch.cat((x * 0.5 + 0.5,y_fake * 0.5 + 0.5), axis=3), os.path.join(dest_folder, f"{basename}_io.png"))
             else:
