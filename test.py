@@ -9,7 +9,7 @@ from utils import save_test_examples, load_checkpoint
 import argparse
 
 def parser():
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="test.py: Model testing script of White-box Cartoonization. For inference, please refer to inference.py")
     parser.add_argument("--dataroot",default=config.VAL_PHOTO_DIR,
                         help="path to image data test folder. default path:"+f"{config.VAL_PHOTO_DIR}")
     parser.add_argument("--weight_path", default=os.path.join(config.CHECKPOINT_FOLDER, config.LOAD_CHECKPOINT_GEN),

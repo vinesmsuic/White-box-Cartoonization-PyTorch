@@ -28,7 +28,7 @@ RESULT_TRAIN_DIR = os.path.join("results", PROJECT_NAME, "train")
 RESULT_VAL_DIR = os.path.join("results", PROJECT_NAME, "val")
 RESULT_TEST_DIR = os.path.join("results", PROJECT_NAME, "test")
 
-SAVE_IMG_PER_STEP = 100
+SAVE_IMG_FREQ = 100
 LOAD_MODEL = True
 SAVE_MODEL = True
 SAVE_MODEL_FREQ = 5

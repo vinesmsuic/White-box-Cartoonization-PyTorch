@@ -6,7 +6,7 @@ import os
 from dataset import MyDataset, MyTestDataset
 from generator_model import Generator
 from discriminator_model import Discriminator
-from VGGNet import VGGNet
+from VGGPytorch import VGGNet
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import save_val_examples, load_checkpoint, save_checkpoint, save_training_images
@@ -15,6 +15,63 @@ from structure_extractor import SuperPixel
 from texture_extractor import ColorShift
 from surface_extractor import GuidedFilter
 import itertools
+import argparse
+
+def parser():
+    parser = argparse.ArgumentParser(description="train.py: Model training script of White-box Cartoonization. Pretraining included.")
+    parser.add_argument("--name",default=config.PROJECT_NAME,
+                        help="project name. default name:"+f"{config.PROJECT_NAME}")
+    parser.add_argument("--batch_size", type=int, default= config.BATCH_SIZE,
+                        help="batch size. default batch size:"+f"{config.BATCH_SIZE}")
+    parser.add_argument("--num_workers", type=int, default= config.NUM_WORKERS,
+                        help="number of workers. default number of workers:"+f"{config.NUM_WORKERS}")
+    parser.add_argument("--save_model_freq", type=int, default= config.SAVE_MODEL_FREQ,
+                        help="saving model each N epochs. default value:"+f"{config.SAVE_MODEL_FREQ}")
+    parser.add_argument("--save_img_freq", type=int, default= config.SAVE_IMG_FREQ,
+                        help="saving training image each N steps. default value:"+f"{config.SAVE_IMG_FREQ}")
+    parser.add_argument("--epochs", type=int, default=config.NUM_EPOCHS,
+                        help=" default value:"+f"{config.NUM_EPOCHS}")
+    parser.add_argument("--lambda_surface", type=float, default= config.LAMBDA_SURFACE,
+                        help="lambda value of surface rep. default:"+f"{config.LAMBDA_SURFACE}")
+    parser.add_argument("--lambda_texture", type=float, default= config.LAMBDA_TEXTURE,
+                        help="lambda value of texture rep. default:"+f"{config.LAMBDA_TEXTURE}")
+    parser.add_argument("--lambda_structure", type=float, default= config.LAMBDA_STRUCTURE,
+                        help="lambda value of structure rep. default:"+f"{config.LAMBDA_STRUCTURE}")
+    parser.add_argument("--lambda_content", type=float, default= config.LAMBDA_CONTENT,
+                        help="lambda value of content loss. default:"+f"{config.LAMBDA_CONTENT}")
+    parser.add_argument("--lambda_variation", type=float, default= config.LAMBDA_VARIATION,
+                        help="lambda value of variation loss. default:"+f"{config.LAMBDA_VARIATION}")
+    return parser.parse_args()
+
+def update_config(args, verbose=True):
+    config.PROJECT_NAME = args.name
+    config.BATCH_SIZE = args.batch_size
+    config.NUM_WORKERS = args.num_workers
+    config.NUM_EPOCHS = args.epochs
+    config.LAMBDA_SURFACE = args.lambda_surface
+    config.LAMBDA_TEXTURE = args.lambda_texture
+    config.LAMBDA_STRUCTURE = args.lambda_structure
+    config.LAMBDA_CONTENT = args.lambda_content
+    config.LAMBDA_VARIATION = args.lambda_variation
+    config.SAVE_MODEL_FREQ = args.save_model_freq
+    config.SAVE_IMG_FREQ = args.save_img_freq
+    
+    if(verbose):
+        print("="*80)
+        print("=> Input config:")
+        print("Using Device: " + config.DEVICE)
+        print(f'PROJECT_NAME: {config.PROJECT_NAME}')
+        print(f'BATCH_SIZE: {config.BATCH_SIZE}')
+        print(f'NUM_WORKERS: {config.NUM_WORKERS}')
+        print(f'NUM_EPOCHS: {config.NUM_EPOCHS}')
+        print(f'LAMBDA_SURFACE: {config.LAMBDA_SURFACE}')
+        print(f'LAMBDA_TEXTURE: {config.LAMBDA_TEXTURE}')
+        print(f'LAMBDA_STRUCTURE: {config.LAMBDA_STRUCTURE}')
+        print(f'LAMBDA_CONTENT: {config.LAMBDA_CONTENT}')
+        print(f'LAMBDA_VARIATION: {config.LAMBDA_VARIATION}')
+        print(f'SAVE_MODEL_FREQ: {config.SAVE_MODEL_FREQ}')
+        print(f'SAVE_IMG_FREQ: {config.SAVE_IMG_FREQ}')
+        print("="*80)
 
 def initialization_phase(gen, loader, opt_gen, l1_loss, VGG, pretrain_epochs):
     for epoch in range(pretrain_epochs):
@@ -127,7 +184,7 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
             opt_gen.step()
 
             #===============================================================================
-            if step % config.SAVE_IMG_PER_STEP == 0:
+            if step % config.SAVE_IMG_FREQ == 0:
                 save_training_images(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), epoch=epoch, step=step, folder=config.RESULT_TRAIN_DIR, suffix_filename="photo_rep")
 
                 save_training_images(torch.cat((sample_photo*0.5+0.5,fake_cartoon*0.5+0.5), axis=3),
@@ -158,7 +215,6 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
         save_checkpoint(disc_texture, opt_disc, epoch, folder=config.CHECKPOINT_FOLDER, filename="last_"+config.CHECKPOINT_DISC)
 
 def main():
-    print("Using Device: " + config.DEVICE)
     disc_texture = Discriminator(in_channels=3).to(config.DEVICE)
     disc_surface = Discriminator(in_channels=3).to(config.DEVICE)
     gen = Generator(img_channels=3).to(config.DEVICE)
@@ -212,4 +268,6 @@ def main():
 
 
 if __name__ == "__main__":
+    args = parser()
+    update_config(args)
     main()

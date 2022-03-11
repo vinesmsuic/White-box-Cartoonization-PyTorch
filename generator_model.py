@@ -21,9 +21,9 @@ class ResidualBlock(nn.Module):
         return x + self.block(x)
 
 class Generator(nn.Module):
-    def __init__(self, img_channels, num_features=32, num_residuals=4):
+    def __init__(self, img_channels=3, num_features=32, num_residuals=4, padding_mode="zeros"):
         super().__init__()
-        self.padding_mode = "zeros"
+        self.padding_mode = padding_mode
 
         self.initial_down = nn.Sequential(
             #k7n32s1

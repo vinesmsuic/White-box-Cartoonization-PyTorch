@@ -15,7 +15,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 
 def parser():
-    parser = argparse.ArgumentParser(description="")
+    parser = argparse.ArgumentParser(description="inference.py: Model inference script of White-box Cartoonization.")
     parser.add_argument('-s',"--source",required=True,
                         help="filepath to a source image or a video or a images folder.")
     parser.add_argument('-w',"--weight_path", required=True,
