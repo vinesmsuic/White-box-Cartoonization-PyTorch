@@ -104,6 +104,7 @@ optional arguments:
 * ~~[] LR Scheduler~~
 * [] Loss visualization
 * [] WandB visualization
+* [] Adding Face data for Training
 * [x] Parser
 * [x] Post processing
 * [x] Inference Code
