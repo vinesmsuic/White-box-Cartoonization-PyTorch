@@ -62,6 +62,7 @@ def slic(image, seg_num=200, kind='mix'):
     image = label2rgb(seg_label, image, kind=kind, bg_label=-1)
     return image
 
+# Apply slic to batches
 def simple_superpixel(batch_image, seg_num=200, kind='mix'):
     num_job = np.shape(batch_image)[0]
     batch_out = Parallel(n_jobs=num_job)(delayed(slic)\
@@ -80,7 +81,6 @@ def color_ss_map(image, seg_num=200, power=1.2, k=10, sim_strategy='CTSF'):
     S.build_region_pairs()
 
     # Start hierarchical grouping
-    
     while S.num_regions() > seg_num:
         
         i,j = S.get_highest_similarity()
@@ -94,11 +94,10 @@ def color_ss_map(image, seg_num=200, power=1.2, k=10, sim_strategy='CTSF'):
     if(not np.max(image)==0):
         image = image/np.max(image)
     image = image*2 - 1
-    
     return image
 
-# Paper used power = 1.2 if we stick with power=1 here
-def selective_adacolor(batch_image, seg_num=200, power=1):
+# Apply color_ss_map to batches
+def selective_adacolor(batch_image, seg_num=200, power=1.2):
     num_job = np.shape(batch_image)[0]
     batch_out = Parallel(n_jobs=num_job)(delayed(color_ss_map)\
                          (image, seg_num, power) for image in batch_image)
