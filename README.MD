@@ -102,15 +102,15 @@ optional arguments:
 
 
 # TODO
-* ~~[] Automatic Mixed Precision~~
-* ~~[] LR Scheduler~~
-* [] Loss visualization
-* [] WandB visualization
-* [] Adding Face data for Training
-* [x] Parser
-* [x] Post processing
-* [x] Inference Code
-* [x] Explaining Code
+- [ ] ~~Automatic Mixed Precision~~
+- [ ] ~~LR Scheduler~~
+- [ ] Loss visualization
+- [ ] WandB visualization
+- [ ] Adding Face data for Training
+- [x] Parser
+- [x] Post processing
+- [x] Inference Code
+- [x] Explaining Code
 
 # Working Environments
 * Windows with CUDA
