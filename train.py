@@ -98,7 +98,7 @@ def initialization_phase(gen, loader, opt_gen, l1_loss, VGG, pretrain_epochs):
         print('[%d/%d] - Recon loss: %.8f' % ((epoch + 1), pretrain_epochs, torch.mean(torch.FloatTensor(losses))))
         
         save_training_images(torch.cat((sample_photo*0.5+0.5,reconstructed*0.5+0.5), axis=3),
-                                                epoch=epoch, step=0, folder=config.RESULT_TRAIN_DIR, suffix_filename="initial_io")
+                                                epoch=epoch, step=0, dest_folder=config.RESULT_TRAIN_DIR, suffix_filename="initial_io")
     
     if config.SAVE_MODEL:
         save_checkpoint(gen, opt_gen, 'i', folder=config.CHECKPOINT_FOLDER, filename=config.CHECKPOINT_GEN)
@@ -186,13 +186,13 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
 
             #===============================================================================
             if step % config.SAVE_IMG_FREQ == 0:
-                save_training_images(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), epoch=epoch, step=step, folder=config.RESULT_TRAIN_DIR, suffix_filename="photo_rep")
+                save_training_images(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), epoch=epoch, step=step, dest_folder=config.RESULT_TRAIN_DIR, suffix_filename="photo_rep")
 
                 save_training_images(torch.cat((sample_photo*0.5+0.5,fake_cartoon*0.5+0.5), axis=3),
-                                                epoch=epoch, step=step, folder=config.RESULT_TRAIN_DIR, suffix_filename="io")
+                                                epoch=epoch, step=step, dest_folder=config.RESULT_TRAIN_DIR, suffix_filename="io")
 
                 save_val_examples(gen=gen, val_loader=val_loader, 
-                                  epoch=epoch, step=step, folder=config.RESULT_VAL_DIR, num_samples=5, concat_image=True)
+                                  epoch=epoch, step=step, dest_folder=config.RESULT_VAL_DIR, num_samples=5, concat_image=True)
 
                 print('[Epoch: %d| Step: %d] - D Surface loss: %.12f' % ((epoch + 1), (step+1), d_loss_surface.item()))
                 print('[Epoch: %d| Step: %d] - D Texture loss: %.12f' % ((epoch + 1), (step+1), d_loss_texture.item()))
