@@ -99,6 +99,10 @@ optional arguments:
                         batch size for video inference. default size:1
 ```
 
+## Compress Inference Video (h265)
+```
+ffmpeg -i input.mp4 -vcodec libx265 -crf 28 output.mp4
+```
 
 
 # TODO
