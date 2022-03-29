@@ -56,6 +56,11 @@ def update_config(args, verbose=True):
     config.SAVE_MODEL_FREQ = args.save_model_freq
     config.SAVE_IMG_FREQ = args.save_img_freq
     
+    config.CHECKPOINT_FOLDER = os.path.join("checkpoints", config.PROJECT_NAME)
+    config.RESULT_TRAIN_DIR = os.path.join("results", config.PROJECT_NAME, "train")
+    config.RESULT_VAL_DIR = os.path.join("results", config.PROJECT_NAME, "val")
+    config.RESULT_TEST_DIR = os.path.join("results", config.PROJECT_NAME, "test")
+
     if(verbose):
         print("="*80)
         print("=> Input config:")
