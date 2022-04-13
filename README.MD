@@ -8,7 +8,20 @@ Unofficial PyTorch implementation of White-box-Cartoonization. We followed the o
 
 ![](https://github.com/SystemErrorWang/White-box-Cartoonization/raw/master/images/method.jpg)
 
-# Our Results (Demo videos, click on the image)
+# Our Results 
+
+
+* Images:
+<p align = 'center'>
+<img src = 'https://i.imgur.com/834daEl.jpg' width = '500px'>
+<img src = 'https://i.imgur.com/UtVkrZw.png' width = '500px'>
+    
+    
+<img src = 'https://i.imgur.com/d2AR2Dj.jpg' width = '500px'>
+<img src = 'https://i.imgur.com/HGkBgYU.png' width = '500px'>
+</p>
+
+* Demo videos (click on the image)
 
 [![Watch the video](https://img.youtube.com/vi/7qog3Dn4Bug/0.jpg)](https://youtu.be/7qog3Dn4Bug)
 
