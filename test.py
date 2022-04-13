@@ -29,8 +29,6 @@ def parser():
 def check_arguments_errors(args):
     if not os.path.isdir(args.dataroot):
         raise(ValueError("Invalid image data folder path {}".format(os.path.abspath(args.dataroot))))
-    if not os.path.isdir(args.dest_folder):
-        raise(ValueError("Invalid destination folder path {}".format(os.path.abspath(args.dest_folder))))
     if not os.path.isfile(args.weight_path):
         raise(ValueError("Invalid model weight path {}".format(os.path.abspath(args.weight_path))))
 

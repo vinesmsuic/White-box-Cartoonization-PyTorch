@@ -23,6 +23,10 @@ def parser():
                         help="path to model weight file.")
     parser.add_argument("--batch_size", type=int, default= config.BATCH_SIZE,
                         help="batch size for video inference. default size:"+f"{config.BATCH_SIZE}")
+    parser.add_argument("--dest_folder", type=str, required=True,
+                        help="Destination folder path for saving results.")
+    parser.add_argument("--suffix", type=str, default= "_infered",
+                        help="Output suffix.")
     return parser.parse_args()
 
 def check_arguments_errors(args):
@@ -92,7 +96,7 @@ def infer_batch(img, model):
     bgr_img = (unnormalized_out.permute((0,2,3,1)).detach().to('cpu').numpy()*255).astype('uint8')
     return bgr_img
 
-def infer_one_image(source_path, output_path, model):
+def infer_one_image(source_path, output_path, model, suffix):
     rgb_image = cv2.cvtColor(cv2.imread(source_path, flags=cv2.IMREAD_COLOR), cv2.COLOR_BGR2RGB)
     height = rgb_image.shape[0]
     width = rgb_image.shape[1]
@@ -100,7 +104,7 @@ def infer_one_image(source_path, output_path, model):
     norm_image = transform_inference(image=rgb_image)["image"]
     out_img = infer_batch(norm_image[None, ...], model)
     out_img = out_img[0]
-    cv2.imwrite(output_path+'_infered.png', cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR))
+    cv2.imwrite(output_path+suffix+'.png', cv2.cvtColor(out_img, cv2.COLOR_RGB2BGR))
 
 #reference: https://github.com/zhen8838/AnimeStylized/blob/main/utils/video.py
 def get_video_reader(path):
@@ -125,7 +129,7 @@ def get_video_writer(path, fps, height, width):
     return video_writer
 
 
-def infer_video(source_path, output_path, batch_size, model):
+def infer_video(source_path, output_path, batch_size, model, suffix):
     video_read, length, fps, height, width = get_video_reader(source_path)
     
     #update scaled height and width
@@ -133,7 +137,7 @@ def infer_video(source_path, output_path, batch_size, model):
 
     transform_inference = get_transform(height=height, width=width)
     
-    output_path = output_path+'_infered.mp4'
+    output_path = output_path+suffix+'.mp4'
     video_write = get_video_writer(output_path, fps, height, width)
     for frames in tqdm(chunked(video_read, batch_size), total=length // batch_size):
         norm_imgs = torch.stack(
@@ -152,13 +156,13 @@ def infer_fn(args):
     gen.eval()
 
     if(check_format(args.source) == 'video'):
-        infer_video(args.source, args.source, batch_size=args.batch_size, model=gen)
+        infer_video(args.source, args.source, batch_size=args.batch_size, model=gen, suffix=args.suffix)
     elif(check_format(args.source) == 'image'):
-        infer_one_image(args.source, args.source, model=gen)
+        infer_one_image(args.source, args.source, model=gen, suffix=args.suffix)
     
     if(check_format(args.source) == 'folder'):
         #Create Inference folder
-        dest_folder = os.path.join(args.source,'inference')
+        dest_folder = args.dest_folder
         if not os.path.exists(dest_folder):
             os.makedirs(dest_folder)
 
@@ -169,9 +173,10 @@ def infer_fn(args):
             input_path = os.path.join(args.source,file)
             output_path = os.path.join(dest_folder,file)
             if(check_format(input_path) == 'video'):
-                infer_video(input_path, output_path, batch_size=args.batch_size, model=gen)
+                infer_video(input_path, output_path, batch_size=args.batch_size, model=gen, suffix=args.suffix)
             elif(check_format(input_path) == 'image'):
-                infer_one_image(input_path, output_path, model=gen)
+                infer_one_image(input_path, output_path, model=gen, suffix=args.suffix)
+            print(f"Finished inferencing file: {file}")
         
     print("=> Finish Inference.")
 
