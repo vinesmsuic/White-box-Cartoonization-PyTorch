@@ -19,6 +19,16 @@ Unofficial PyTorch implementation of White-box-Cartoonization. We followed the o
     
 <img src = 'https://i.imgur.com/d2AR2Dj.jpg' width = '400px'>
 <img src = 'https://i.imgur.com/HGkBgYU.png' width = '400px'>
+    
+<img src = 'https://i.imgur.com/TKNqrIC.jpg' width = '400px'>
+<img src = 'https://i.imgur.com/hlzOATo.png' width = '400px'>
+    
+<img src = 'https://i.imgur.com/Yp81tY6.jpg' width = '400px'>
+<img src = 'https://i.imgur.com/y5xPwRg.png' width = '400px'>
+    
+<img src = 'https://i.imgur.com/tBzdzU1.jpg' width = '400px'>
+<img src = 'https://i.imgur.com/UyKpO4d.png' width = '400px'>
+    
 </p>
 
 * Demo videos (click on the image)
