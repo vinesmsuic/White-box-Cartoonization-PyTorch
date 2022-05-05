@@ -3,8 +3,8 @@
 Unofficial PyTorch implementation of White-box-Cartoonization. We followed the original Tensorflow training implementation from the paper author ([Xinrui Wang](https://github.com/SystemErrorWang/White-box-Cartoonization)).
 
 **Key difference from Tensorflow implementation:**
-* We used PyTorchVGG19 instead of CaffeVGG model, which has a different range of input/output and std/mean.
-
+* Its PyTorch.
+* We used PyTorchVGG19 instead of CaffeVGG16 model, which has a different range of input/output and std/mean.
 
 ![](https://github.com/SystemErrorWang/White-box-Cartoonization/raw/master/images/method.jpg)
 
