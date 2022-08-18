@@ -12,7 +12,7 @@ def save_training_images(image, epoch, step, dest_folder, suffix_filename:str):
     save_image(image, os.path.join(dest_folder, f"epoch_{epoch}_step_{step}_{suffix_filename}.png"))
 
 
-def save_val_examples(gen, val_loader, epoch, step, dest_folder, num_samples=1, concat_image=True):
+def save_val_examples(gen, val_loader, epoch, step, dest_folder, num_samples=1, concat_image=True, post_processing=True):
     if not os.path.exists(dest_folder):
         os.makedirs(dest_folder)
 
@@ -24,7 +24,11 @@ def save_val_examples(gen, val_loader, epoch, step, dest_folder, num_samples=1, 
             basename = os.path.splitext(basename)[0] # remove extension name
             x = x.to(config.DEVICE)
             y_fake = gen(x)
+            if(post_processing):
+                extract_surface = GuidedFilter()
+                y_fake = extract_surface.process(x, y_fake, r=1)
 
+            # * 0.5 + 0.5 is to remove the normalization used in config.py
             if(concat_image):
                 save_image(torch.cat((x * 0.5 + 0.5,y_fake * 0.5 + 0.5), axis=3), os.path.join(dest_folder, f"epoch_{epoch}_step_{step}_io_{basename}.png"))
             else:

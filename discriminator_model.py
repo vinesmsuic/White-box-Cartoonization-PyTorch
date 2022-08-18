@@ -9,8 +9,9 @@ from torch.nn.utils import spectral_norm
 # Paper used spectral_norm
 
 class Block(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding):
+    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, act=True):
         super().__init__()
+        self.act = act
         self.sn_conv = spectral_norm(nn.Conv2d(
                 in_channels,
                 out_channels,
@@ -24,7 +25,8 @@ class Block(nn.Module):
 
     def forward(self, x):
         x = self.sn_conv(x)
-        x = self.LReLU(x)
+        if self.act:
+            x = self.LReLU(x)
 
         return x
 
@@ -49,7 +51,7 @@ class Discriminator(nn.Module):
             Block(features[2], features[2], kernel_size=3, stride=1, padding=1),
 
             #k1n1s1
-            Block(features[2], out_channels, kernel_size=1, stride=1, padding=0)
+            Block(features[2], out_channels, kernel_size=1, stride=1, padding=0, act=False)
         )
 
     def forward(self, x):

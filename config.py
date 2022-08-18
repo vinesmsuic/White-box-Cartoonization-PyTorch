@@ -28,7 +28,7 @@ RESULT_TRAIN_DIR = os.path.join("results", PROJECT_NAME, "train")
 RESULT_VAL_DIR = os.path.join("results", PROJECT_NAME, "val")
 RESULT_TEST_DIR = os.path.join("results", PROJECT_NAME, "test")
 
-SAVE_IMG_FREQ = 100
+SAVE_IMG_FREQ = 1000
 LOAD_MODEL = True
 SAVE_MODEL = True
 SAVE_MODEL_FREQ = 5
@@ -39,11 +39,11 @@ SAVE_MODEL_FREQ = 5
 #BATCH_SIZE = 16
 #LEARNING_RATE = 2e-4
 #=============================
-BATCH_SIZE = 1
+BATCH_SIZE = 32
 LEARNING_RATE = 2e-4
 PRETRAIN_EPOCHS = 10
 NUM_EPOCHS = 200
-NUM_WORKERS = 4
+NUM_WORKERS = 8
 IMAGE_SIZE = 256
 #=============================
 
@@ -55,10 +55,10 @@ IMAGE_SIZE = 256
 #LAMBDA_CONTENT = 2000 #(author's code used 200)
 #LAMBDA_VARIATION = 10000
 #=============================
-LAMBDA_SURFACE = 0.1
-LAMBDA_TEXTURE = 1
-LAMBDA_STRUCTURE = 200
-LAMBDA_CONTENT = 200
+LAMBDA_SURFACE = 1.0
+LAMBDA_TEXTURE = 10
+LAMBDA_STRUCTURE = 2000
+LAMBDA_CONTENT = 2000
 LAMBDA_VARIATION = 10000
 #=============================
 
@@ -66,7 +66,9 @@ transform_train = A.Compose(
     [
         #A.RandomCrop(width=IMAGE_SIZE*1.2, height=IMAGE_SIZE*1.2),
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
-        #A.HorizontalFlip(p=0.5),
+        A.HorizontalFlip(p=0.5),
+        A.ChannelShuffle(p=0.25),
+        A.HueSaturationValue(p=0.25),
         #A.RandomBrightnessContrast(p=0.2),
         A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255),
         ToTensorV2(),
