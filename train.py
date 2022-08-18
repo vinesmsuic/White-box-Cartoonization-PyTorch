@@ -89,7 +89,7 @@ def initialization_phase(gen, loader, opt_gen, l1_loss, VGG, pretrain_epochs):
 
             sample_photo_feature = VGG(sample_photo)
             reconstructed_feature = VGG(reconstructed)
-            reconstruction_loss = l1_loss(reconstructed_feature, sample_photo_feature.detach())
+            reconstruction_loss = l1_loss(reconstructed_feature, sample_photo_feature.detach()) * 255
             
             losses.append(reconstruction_loss.item())
 
@@ -193,11 +193,11 @@ def train_fn(disc_texture, disc_surface, gen, loader, opt_disc, opt_gen, l1_loss
             if step % config.SAVE_IMG_FREQ == 0:
                 save_training_images(torch.cat((blur_fake*0.5+0.5,gray_fake*0.5+0.5,input_superpixel*0.5+0.5), axis=3), epoch=epoch, step=step, dest_folder=config.RESULT_TRAIN_DIR, suffix_filename="photo_rep")
 
-                save_training_images(torch.cat((sample_photo*0.5+0.5,fake_cartoon*0.5+0.5), axis=3),
+                save_training_images(torch.cat((sample_photo*0.5+0.5,fake_cartoon*0.5+0.5,output_photo*0.5+0.5), axis=3),
                                                 epoch=epoch, step=step, dest_folder=config.RESULT_TRAIN_DIR, suffix_filename="io")
 
                 save_val_examples(gen=gen, val_loader=val_loader, 
-                                  epoch=epoch, step=step, dest_folder=config.RESULT_VAL_DIR, num_samples=5, concat_image=True)
+                                  epoch=epoch, step=step, dest_folder=config.RESULT_VAL_DIR, num_samples=5, concat_image=True, post_processing=True)
 
                 print('[Epoch: %d| Step: %d] - D Surface loss: %.12f' % ((epoch + 1), (step+1), d_loss_surface.item()))
                 print('[Epoch: %d| Step: %d] - D Texture loss: %.12f' % ((epoch + 1), (step+1), d_loss_texture.item()))

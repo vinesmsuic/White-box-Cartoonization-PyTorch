@@ -174,9 +174,10 @@ def infer_fn(args):
             output_path = os.path.join(dest_folder,file)
             if(check_format(input_path) == 'video'):
                 infer_video(input_path, output_path, batch_size=args.batch_size, model=gen, suffix=args.suffix)
+                print(f"Finished inferencing file: {file}")
             elif(check_format(input_path) == 'image'):
                 infer_one_image(input_path, output_path, model=gen, suffix=args.suffix)
-            print(f"Finished inferencing file: {file}")
+                print(f"Finished inferencing file: {file}")
         
     print("=> Finish Inference.")
 
