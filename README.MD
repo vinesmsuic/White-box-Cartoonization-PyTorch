@@ -96,6 +96,45 @@ python train.py
 
 # More options:
 
+## Train
+```
+usage: train.py [-h] [--name NAME] [--batch_size BATCH_SIZE]
+                [--num_workers NUM_WORKERS]
+                [--save_model_freq SAVE_MODEL_FREQ]
+                [--save_img_freq SAVE_IMG_FREQ] [--epochs EPOCHS]
+                [--lambda_surface LAMBDA_SURFACE]
+                [--lambda_texture LAMBDA_TEXTURE]
+                [--lambda_structure LAMBDA_STRUCTURE]
+                [--lambda_content LAMBDA_CONTENT]
+                [--lambda_variation LAMBDA_VARIATION]
+
+train.py: Model training script of White-box Cartoonization. Pretraining
+included.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --name NAME           project name. default name:project_name
+  --batch_size BATCH_SIZE
+                        batch size. default batch size:32
+  --num_workers NUM_WORKERS
+                        number of workers. default number of workers:8
+  --save_model_freq SAVE_MODEL_FREQ
+                        saving model each N epochs. default value:5
+  --save_img_freq SAVE_IMG_FREQ
+                        saving training image each N steps. default value:1000
+  --epochs EPOCHS       default value:200
+  --lambda_surface LAMBDA_SURFACE
+                        lambda value of surface rep. default:0.1
+  --lambda_texture LAMBDA_TEXTURE
+                        lambda value of texture rep. default:1
+  --lambda_structure LAMBDA_STRUCTURE
+                        lambda value of structure rep. default:200
+  --lambda_content LAMBDA_CONTENT
+                        lambda value of content loss. default:180
+  --lambda_variation LAMBDA_VARIATION
+                        lambda value of variation loss. default:10000
+```
+
 ## Test
 ```
 usage: test.py [-h] [--dataroot DATAROOT] [--weight_path WEIGHT_PATH] [--dest_folder DEST_FOLDER] [--sample_size SAMPLE_SIZE] [--shuffle] [--concat_img]
