@@ -63,6 +63,21 @@ pip install -U albumentations
 pip install tqdm
 ```
 
+* gradio
+```bash
+pip install gradio
+```
+
+# Image inference Demo
+
+I have only trained a model on scenery images only.
+
+```bash
+python3 image_infer_demo.py -w weights/sceneryonly.pth.tar
+```
+Should start a demo like this:
+<img src = 'https://i.imgur.com/rH7DVhy.png' width = '100%'>
+
 # To start training
 
 0. Read https://vinesmsuic.github.io/2022/01/21/i2i-wbcartoonization to understand the implementation
@@ -134,6 +149,7 @@ ffmpeg -i input.mp4 -vcodec libx265 -crf 28 output.mp4
 - [x] Post processing
 - [x] Inference Code
 - [x] Explaining Code
+- [X] Live Demo with Gradio
 
 # Working Environments
 * Windows with CUDA
