@@ -55,10 +55,10 @@ IMAGE_SIZE = 256
 #LAMBDA_CONTENT = 2000 #(author's code used 200)
 #LAMBDA_VARIATION = 10000
 #=============================
-LAMBDA_SURFACE = 1.0
-LAMBDA_TEXTURE = 10
-LAMBDA_STRUCTURE = 2000
-LAMBDA_CONTENT = 2000
+LAMBDA_SURFACE = 0.1
+LAMBDA_TEXTURE = 1
+LAMBDA_STRUCTURE = 200
+LAMBDA_CONTENT = 180
 LAMBDA_VARIATION = 10000
 #=============================
 
@@ -67,8 +67,8 @@ transform_train = A.Compose(
         #A.RandomCrop(width=IMAGE_SIZE*1.2, height=IMAGE_SIZE*1.2),
         A.Resize(width=IMAGE_SIZE, height=IMAGE_SIZE),
         A.HorizontalFlip(p=0.5),
-        A.ChannelShuffle(p=0.25),
-        A.HueSaturationValue(p=0.25),
+        #A.ChannelShuffle(p=0.25),
+        #A.HueSaturationValue(p=0.25),
         #A.RandomBrightnessContrast(p=0.2),
         A.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5], max_pixel_value=255),
         ToTensorV2(),
