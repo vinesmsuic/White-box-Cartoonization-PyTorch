@@ -80,14 +80,15 @@ def get_transform(height, width):
 #===============================================
 #NOTE Equation 9 in the paper, adjust sharpness of output
 # If no post_processing, noise will be found
-def post_processing(x, G_x):
+def post_processing(x, G_x, r: int=1):
     extract_surface = GuidedFilter()
-    return extract_surface.process(x, G_x, r=1)
+    return extract_surface.process(x, G_x, r=r)
 #===============================================
 
 def infer_batch(img, model):
     img = img.to(config.DEVICE)
     out = model.forward(img)
+    out = torch.tanh(out)
     out = post_processing(img, out)
 
     #TODO fix this later

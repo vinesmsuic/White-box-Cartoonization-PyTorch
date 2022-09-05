@@ -25,6 +25,7 @@ def save_val_examples(gen, val_loader, epoch, step, dest_folder, num_samples=1, 
             x = x.to(config.DEVICE)
             y_fake = gen(x)
             if(post_processing):
+                y_fake = torch.tanh(y_fake)
                 extract_surface = GuidedFilter()
                 y_fake = extract_surface.process(x, y_fake, r=1)
 
@@ -54,6 +55,7 @@ def save_test_examples(gen, test_dataset, dest_folder, num_samples=50, shuffle=F
             x = x.to(config.DEVICE)
             y_fake = gen(x)
             if(post_processing):
+                y_fake = torch.tanh(y_fake)
                 extract_surface = GuidedFilter()
                 y_fake = extract_surface.process(x, y_fake, r=1)
             if(concat_image):
