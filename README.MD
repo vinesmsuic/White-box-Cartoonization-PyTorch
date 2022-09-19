@@ -51,20 +51,13 @@ Unofficial PyTorch implementation of White-box-Cartoonization. We followed the o
 
 # Dependencies
 
-* Albumentations
+* PyTorch
 
+Some uncommon dependencies below:
 ```bash
 pip install -U albumentations
-```
-
-* tqdm
-
-```bash
+pip install more-itertools
 pip install tqdm
-```
-
-* gradio
-```bash
 pip install gradio
 ```
 
@@ -158,7 +151,8 @@ optional arguments:
 
 ## Inference (Support Video)
 ```
-usage: inference.py [-h] -s SOURCE -w WEIGHT_PATH [--batch_size BATCH_SIZE]
+usage: inference.py [-h] -s SOURCE -w WEIGHT_PATH [--batch_size BATCH_SIZE] --dest_folder DEST_FOLDER
+                    [--suffix SUFFIX]
 
 inference.py: Model inference script of White-box Cartoonization.
 
@@ -169,7 +163,15 @@ optional arguments:
   -w WEIGHT_PATH, --weight_path WEIGHT_PATH
                         path to model weight file.
   --batch_size BATCH_SIZE
-                        batch size for video inference. default size:1
+                        batch size for video inference. default size:32
+  --dest_folder DEST_FOLDER
+                        Destination folder path for saving results.
+  --suffix SUFFIX       Output suffix.
+```
+
+For example:
+```bash
+python3 image_infer_demo.py -w weights/sceneryonly.pth.tar --batch_size 8 -s input.mp4 --dest_folder .
 ```
 
 ## Compress Inference Video (h265)
