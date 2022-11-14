@@ -208,7 +208,7 @@ If you use this repository in your research, consider citing it using the follow
 }
 
 @misc{Ku_PytorchWBCartoon,
-  author={Ku, Wing-Fung},
+  author={Wing-Fung Ku},
   title={White-box-Cartoonization-PyTorch: Full PyTorch implementation of White-Box Cartoon Representations},
   month={May},
   year={2022},
