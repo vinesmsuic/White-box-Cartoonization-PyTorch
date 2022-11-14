@@ -198,7 +198,7 @@ ffmpeg -i input.mp4 -vcodec libx265 -crf 28 output.mp4
 
 # Citing
 If you use this repository in your research, consider citing it using the following Bibtex entry:
-```
+```bibtex
 @InProceedings{Wang_2020_CVPR, 
     author = {Wang, Xinrui and Yu, Jinze}, 
     title = {Learning to Cartoonize Using White-Box Cartoon Representations}, 
@@ -208,7 +208,7 @@ If you use this repository in your research, consider citing it using the follow
 }
 
 @misc{Ku_PytorchWBCartoon,
-  author={Wing-Fung Ku},
+  author={Ku, Wing-Fung},
   title={White-box-Cartoonization-PyTorch: Full PyTorch implementation of White-Box Cartoon Representations},
   month={May},
   year={2022},
